@@ -5,7 +5,7 @@ import { PromptTemplate } from 'langchain/prompts';
 import { CallbackManager } from 'langchain/callbacks';
 
 const CONDENSE_PROMPT =
-  PromptTemplate.fromTemplate(`Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
+  PromptTemplate.fromTemplate(`Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. Assess the intent of the follow up question. If it does not appear to be relevant to the chat history, generate a standalone question that best reflects the user's intent with their query. 
 
 Chat History:
 {chat_history}
@@ -13,10 +13,10 @@ Follow Up Input: {question}
 Standalone question:`);
 
 const QA_PROMPT = PromptTemplate.fromTemplate(
-  `You are an AI assistant providing helpful advice. You are given the following extracted parts of a long document and a question. Provide a conversational answer based on the context provided.
-You should only provide hyperlinks that reference the context below. Do NOT make up hyperlinks.
+  `You are an AI assistant providing helpful advice. You are given the following extracted parts of multiple scientific documents and a question. Provide a conversational answer based on the context provided.
+You should only provide hyperlinks that reference the context below. Do NOT make up hyperlinks. Make sure to give a comprehensive answer tha covers all aspects of the question.
 If you can't find the answer in the context below, just say "Hmm, I'm not sure." Don't try to make up an answer.
-If the question is not related to the context, politely respond that you are tuned to only answer questions that are related to the context.
+If the question is not related to the context, politely respond that you are tuned to only answer questions that are related to the context. Ensure that your answer directly answers the query. Generate a long and comprehensive response that is at minimum: 200 words.
 
 Question: {question}
 =========
