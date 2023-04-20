@@ -15,8 +15,9 @@ Standalone question:`);
 
 const QA_PROMPT = PromptTemplate.fromTemplate(
   `You are an AI assistant providing helpful advice. You are given the following extracted parts of a long document and a question. Provide a conversational answer based on the context provided.
-You should only provide hyperlinks that reference the context below. Do NOT make up hyperlinks. Make sure to give a comprehensive answer tha covers all aspects of the question.
+   Make sure to give a comprehensive answer tha covers all aspects of the question.
 If you can't find the answer in the context below, just say "Hmm, I'm not sure." Don't try to make up an answer.
+At the end of every sentence, reference the context that you got it from by the filename; do not include the path. Place these sources at the end of every sentence, not at the end of your response.
 If the question is not related to the context, politely respond that you are tuned to only answer questions that are related to the context.
 
 Question: {question}
@@ -26,34 +27,35 @@ Question: {question}
 Answer in Markdown:`,
 );
 
-
-
 export const makeChain = (
   vectorstore: PineconeStore,
   onTokenStream?: (token: string) => void
 ) => {
+  console.log('Creating questionGenerator chain');
   const questionGenerator = new LLMChain({
     llm: new OpenAIChat({ temperature: 0 }),
     prompt: CONDENSE_PROMPT,
   });
+
+  console.log('Creating docChain');
   const docChain = loadQAChain(
     new OpenAIChat({
       temperature: 0,
-      modelName: 'gpt-4', //change this to older versions (e.g. gpt-3.5-turbo) if you don't have access to gpt-4
+      modelName: 'gpt-3.5-turbo',
       streaming: Boolean(onTokenStream),
       callbackManager: onTokenStream
         ? CallbackManager.fromHandlers({
             async handleLLMNewToken(token) {
+              console.log('New token:', token);
               onTokenStream(token);
-              console.log(token);
             },
           })
         : undefined,
     }),
-    { prompt: QA_PROMPT
-    },
+    { prompt: QA_PROMPT },
   );
 
+  console.log('Creating ChatVectorDBQAChain');
   return new ChatVectorDBQAChain({
     vectorstore,
     combineDocumentsChain: docChain,

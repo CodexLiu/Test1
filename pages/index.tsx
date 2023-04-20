@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback, ChangeEvent} from 'react';
 import Layout from '@/components/layout';
 import styles from '@/styles/Home.module.css';
 import { Message } from '@/types/chat';
@@ -7,6 +7,9 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import LoadingDots from '@/components/ui/LoadingDots';
 import { Document } from 'langchain/document';
+import FileUploadForm from './FileUploadForm';
+import path from 'path';
+
 import {
   Accordion,
   AccordionContent,
@@ -167,6 +170,7 @@ export default function Home() {
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
             Digestiva Literature Bot
           </h1>
+          <FileUploadForm />
           <main className={styles.main}>
             <div className={styles.cloud}>
               <div ref={messageListRef} className={styles.messagelist}>
@@ -233,7 +237,7 @@ export default function Home() {
                                       {doc.pageContent}
                                     </ReactMarkdown>
                                     <p className="mt-2">
-                                      <b>Source:</b> {doc.metadata.source}
+                                    <b>Source:</b> {path.basename(doc.metadata.source, '.pdf')}
                                     </p>
                                   </AccordionContent>
                                 </AccordionItem>
