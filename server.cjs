@@ -82,7 +82,7 @@ app.post("/upload", upload.single("pdf"), (req, res) => {
           });
         });
       }
-    );
+    //);
 
     res.status(200).send("File uploaded successfully!");
   } else {
