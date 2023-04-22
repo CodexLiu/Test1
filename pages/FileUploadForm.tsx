@@ -22,7 +22,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = () => {
         formData.append('pdf', selectedFiles[0]);
   
         try {
-          await axios.post('http://localhost:4000/upload', formData, {
+          await axios.post('http://35.90.17.67:4000/upload', formData, {
             onUploadProgress: (progressEvent: AxiosProgressEvent) => {
               if (progressEvent.total) {
                 const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
