@@ -36,10 +36,11 @@ const upload = multer({
   },
 });
 
-app.post("/upload", upload.single("pdf"), (req, res) => {
-  if (req.file) {
-    console.log("File uploaded:", req.file.originalname);
-
+app.post("/upload", upload.array("pdf"), (req, res) => {
+  if (req.files) {
+    req.files.forEach((file) => {
+      console.log("File uploaded:", file.originalname);
+    });
     // Remove .DS_Store file before running the npm command
     exec(
       'find . -name ".DS_Store" -type f -delete',
@@ -84,7 +85,7 @@ app.post("/upload", upload.single("pdf"), (req, res) => {
       }
     );
 
-    res.status(200).send("File uploaded successfully!");
+    res.status(200).send("File(s) uploaded successfully!");
   } else {
     res.status(400).send("File upload failed");
   }
@@ -94,3 +95,10 @@ app.post("/upload", upload.single("pdf"), (req, res) => {
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).send("Internal Server Error");
+});
+
