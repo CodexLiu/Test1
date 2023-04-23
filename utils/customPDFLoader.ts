@@ -33,20 +33,24 @@ export class CustomPDFLoader extends BufferLoader {
     raw: Buffer,
     metadata: Document['metadata'],
   ): Promise<Document[]> {
-    const { pdf } = await PDFLoaderImports();
-    const parsed = await pdf(raw);
-    return [
-      new Document({
-        pageContent: parsed.text,
-        metadata: {
-          ...metadata,
-          pdf_numpages: parsed.numpages,
-        },
-      }),
-    ];
+    try {
+      const { pdf } = await PDFLoaderImports();
+      const parsed = await pdf(raw);
+      return [
+        new Document({
+          pageContent: parsed.text,
+          metadata: {
+            ...metadata,
+            pdf_numpages: parsed.numpages,
+          },
+        }),
+      ];
+    } catch (error) {
+      console.error(`Error processing file ${metadata.source}:`, error);
+      return [];
+    }
   }
 }
-
 async function PDFLoaderImports() {
   try {
     // the main entrypoint has some debug code that we don't want to import
@@ -59,3 +63,4 @@ async function PDFLoaderImports() {
     );
   }
 }
+
