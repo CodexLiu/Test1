@@ -13,13 +13,15 @@ const FileUploadForm: React.FC<FileUploadFormProps> = () => {
       setSelectedFiles(event.target.files);
     }
   }, []);
-
+  
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (selectedFiles) {
         const formData = new FormData();
-        formData.append('pdf', selectedFiles[0]);
+        for (let i = 0; i < selectedFiles.length; i++) {
+          formData.append("pdf", selectedFiles[i]);
+        }
   
         try {
           await axios.post('http://35.90.17.67:4000/upload', formData, {
