@@ -12,10 +12,7 @@ app.use(cors());
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, "public")));
-
-// Define a storage engine for multer that saves files to the 'pdfs' directory
+// Define a storage engine for multer that saves files to the 'docs' directory
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "docs/");
@@ -41,51 +38,63 @@ app.post("/upload", upload.array("pdf"), (req, res) => {
     req.files.forEach((file) => {
       console.log("File uploaded:", file.originalname);
     });
-    // Remove .DS_Store file before running the npm command
-    exec(
-      'find . -name ".DS_Store" -type f -delete',
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error deleting .DS_Store file: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`Delete .DS_Store file stderr: ${stderr}`);
-          return;
-        }
-        console.log("Deleted .DS_Store file");
 
-        // Run the npm run ingest command
+    const deleteDSStore = () => {
+      return new Promise((resolve, reject) => {
+        exec(
+          'find . -name ".DS_Store" -type f -delete',
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Error deleting .DS_Store file: ${error.message}`);
+              reject(error);
+            } else {
+              console.log("Deleted .DS_Store file");
+              resolve();
+            }
+          }
+        );
+      });
+    };
+
+    const runIngest = () => {
+      return new Promise((resolve, reject) => {
         exec("npm run ingest", (error, stdout, stderr) => {
           if (error) {
             console.error(`Error executing command: ${error.message}`);
-            return;
+            reject(error);
+          } else {
+            console.log(`Command stdout: ${stdout}`);
+            resolve();
           }
-          if (stderr) {
-            console.error(`Command stderr: ${stderr}`);
-            return;
-          }
-          console.log(`Command stdout: ${stdout}`);
-
-          // Delete the contents of the docs folder
-          exec("rm -rf ./docs/*", (error, stdout, stderr) => {
-            if (error) {
-              console.error(
-                `Error deleting contents of docs folder: ${error.message}`
-              );
-              return;
-            }
-            if (stderr) {
-              console.error(`Delete contents of docs folder stderr: ${stderr}`);
-              return;
-            }
-            console.log("Deleted contents of docs folder");
-          });
         });
-      }
-    );
+      });
+    };
 
-    res.status(200).send("File(s) uploaded successfully!");
+    const deleteDocsFolderContents = () => {
+      return new Promise((resolve, reject) => {
+        exec("rm -rf ./docs/*", (error, stdout, stderr) => {
+          if (error) {
+            console.error(
+              `Error deleting contents of docs folder: ${error.message}`
+            );
+            reject(error);
+          } else {
+            console.log("Deleted contents of docs folder");
+            resolve();
+          }
+        });
+      });
+    };
+
+    deleteDSStore()
+      .then(runIngest)
+      .then(deleteDocsFolderContents)
+      .then(() => {
+        res.status(200).send("File(s) uploaded successfully!");
+      })
+      .catch((error) => {
+        res.status(500).send("An error occurred during file processing");
+      });
   } else {
     res.status(400).send("File upload failed");
   }
@@ -101,4 +110,5 @@ app.use((err, req, res, next) => {
   console.error("Error:", err.message);
   res.status(500).send("Internal Server Error");
 });
+
 
