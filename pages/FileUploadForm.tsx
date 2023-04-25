@@ -13,31 +13,31 @@ const FileUploadForm: React.FC<FileUploadFormProps> = () => {
       setSelectedFiles(event.target.files);
     }
   }, []);
-  
+
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (selectedFiles) {
-        const formData = new FormData();
-        for (let i = 0; i < selectedFiles.length; i++) {
-          formData.append("pdf", selectedFiles[i]);
-        }
-  
         try {
-          await axios.post('http://35.90.17.67:4000/upload', formData, {
-            onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-              if (progressEvent.total) {
-                const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                setUploadProgress(progress);
-              }
-            },
-          });
-  
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const formData = new FormData();
+            formData.append("pdf", selectedFiles[i]);
+
+            await axios.post('http://localhost:4000/upload', formData, {
+              onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+                if (progressEvent.total) {
+                  const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                  setUploadProgress(progress);
+                }
+              },
+            });
+          }
+
           setUploadStatus('PDF file(s) uploaded successfully!');
         } catch (error) {
           setUploadStatus('An error occurred while uploading the PDF file(s)');
         }
-  
+
         setSelectedFiles(null);
       }
     },
