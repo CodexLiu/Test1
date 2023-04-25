@@ -5,6 +5,7 @@ const { exec } = require("child_process");
 const app = express();
 const port = 4000;
 const cors = require("cors");
+const { spawn } = require("child_process");
 
 // Enable CORS for all routes
 app.use(cors());
@@ -58,12 +59,24 @@ app.post("/upload", upload.array("pdf"), (req, res) => {
 
     const runIngest = () => {
       return new Promise((resolve, reject) => {
-        exec("npm run ingest", (error, stdout, stderr) => {
-          if (error) {
-            console.error(`Error executing command: ${error.message}`);
-            reject(error);
+        console.log("Starting ingest process...");
+
+        const ingestProcess = spawn("npm", ["run", "ingest"]);
+
+        ingestProcess.stdout.on("data", (data) => {
+          console.log(`stdout: ${data}`);
+        });
+
+        ingestProcess.stderr.on("data", (data) => {
+          console.error(`stderr: ${data}`);
+        });
+
+        ingestProcess.on("close", (code) => {
+          if (code !== 0) {
+            console.error(`Ingest process exited with code ${code}`);
+            reject(new Error("Ingest process failed"));
           } else {
-            console.log(`Command stdout: ${stdout}`);
+            console.log("Ingest process completed.");
             resolve();
           }
         });
@@ -104,6 +117,13 @@ app.post("/upload", upload.array("pdf"), (req, res) => {
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).send("Internal Server Error");
+});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
