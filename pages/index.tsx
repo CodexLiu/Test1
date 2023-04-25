@@ -168,7 +168,7 @@ export default function Home() {
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-            Digestiva Literature Bot
+            Tidal Vision Chat Bot
           </h1>
           <FileUploadForm />
           <main className={styles.main}>
@@ -286,7 +286,7 @@ export default function Home() {
                     placeholder={
                       loading
                         ? 'Waiting for response...'
-                        : 'How does food particle size affect digestion?'
+                        : 'What is chitosan?'
                     }
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

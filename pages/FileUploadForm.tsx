@@ -49,7 +49,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = () => {
       onSubmit={handleSubmit}
       className="flex flex-col items-center justify-center gap-4 py-4 border border-gray-300 rounded-md"
     >
-      <h3 className="text-lg font-semibold mb-2">Upload Documents to Digestive Database</h3>
+      <h3 className="text-lg font-semibold mb-2">Upload Documents to Tidal Vision Database</h3>
       {uploadStatus && <p>{uploadStatus}</p>}
       {uploadProgress > 0 && (
         <div className="w-full h-2 bg-gray-300 rounded-md">
