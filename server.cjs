@@ -10,6 +10,12 @@ const { spawn } = require("child_process");
 // Enable CORS for all routes
 app.use(cors());
 
+//set upload size limit
+app.use(express.json({ limit: "5gb" })); // Adjust the limit as needed
+
+// Set the server timeout
+app.timeout = 600000; // 10 minutes, adjust as needed
+
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
 
